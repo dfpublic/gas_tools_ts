@@ -1,22 +1,30 @@
+/**
+ * Gets a sheet by the sheet id
+ * @param {*} sheetID 
+ */
 function GetSheetById(sheetID){
   return SpreadsheetApp.openById(sheetID);;
 }
+
+/**
+ * Gets the currently active spreadsheet
+ */
 function GetActiveSheet(){
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 /**
  * 
- * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} sheet 
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} spreadsheet 
  * @param {*} tabName 
  * @param {*} headers 
  */
-function GoogleSheet(sheet, tabName, headers) {
+function GoogleSheet(spreadsheet, tabName, headers) {
   /**
    * Name of the person.
    * @name GoogleSheet#sheet
    * @type {GoogleAppsScript.Spreadsheet.Sheet}
    */
-  this.sheet = sheet.getSheetByName(tabName);
+  this.sheet = spreadsheet.getSheetByName(tabName);
   this.headers = headers;
   var headersIsArray = Object.prototype.toString.call(this.headers) == '[object Array]';
   if (headersIsArray) {
