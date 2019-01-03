@@ -16,7 +16,7 @@ GoogleCalendar.prototype.getEvents = function (startTime, endTime) {
         start_time: event_start,
         end_time: event_end,
         duration: start_day === end_day ? start_day : start_day + ' - ' + end_day,
-        month: formatMonth(event_start),
+        //month: formatMonth(event_start),
         is_all_day: event.isAllDayEvent() ? 1 : 0
       }
     }
