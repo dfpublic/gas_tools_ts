@@ -23,6 +23,9 @@ function GoogleSheet(sheet, tabName, headers) {
     this.initHeaders();
   }
 }
+/**
+ * Gets the values within a given range
+ */
 GoogleSheet.prototype.getRange = function (range) {
   var range = this.sheet.getRange(range);
   var values = range ? range.getValues() : [];
