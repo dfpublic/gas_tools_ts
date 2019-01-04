@@ -2,14 +2,14 @@
  * Gets a sheet by the sheet id
  * @param {*} sheetID 
  */
-function GetSheetById(sheetID){
+function GetSheetById(sheetID) {
   return SpreadsheetApp.openById(sheetID);;
 }
 
 /**
  * Gets the currently active spreadsheet
  */
-function GetActiveSheet(){
+function GetActiveSheet() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 /**
@@ -60,7 +60,8 @@ GoogleSheet.prototype.initHeaders = function () {
 }
 
 GoogleSheet.prototype.getSpreadsheetHeaders = function () {
-  var range = this.sheet.getRange("A1:ZZ1");
+  var max_cols = this.sheet.getMaxColumns();
+  var range = this.sheet.getRange(1, 1, 1, max_cols);
   var values = range ? range.getValues()[0] : [];
   for (var key in values) {
     if (values[key] === "") {
@@ -92,7 +93,7 @@ GoogleSheet.prototype.findOne = function (query) {
   var search_result = null;
   //Search info is an array of objects of the format {col: i, value: v}, where i is the column to search and v is the value to be found
   var search_info = Object.keys(query).map(
-    function(key) {
+    function (key) {
       var value = query[key];
       var col_idx = self.headers.indexOf(key);
       return {
@@ -105,25 +106,25 @@ GoogleSheet.prototype.findOne = function (query) {
   //Run through all rows in the current sheet and check for the rows that match
   var numrows = this.sheet.getLastRow() - 1; //Subtract 1 to remove the header row
   var numcols = this.sheet.getLastColumn();
-  if(numrows < 1) {
+  if (numrows < 1) {
     return []; //Do not attempt to query the seelt
   }
   var range = this.sheet.getRange(2, 1, numrows, numcols); //Start at 2 to exclude header row
   var data = range.getValues();
 
-  for(var row_idx in data){
+  for (var row_idx in data) {
     var row = data[row_idx];
     var matches = 0;
     //check that all the search criteria are matched
-    for(var search_info_idx in search_info) {
+    for (var search_info_idx in search_info) {
       var check = search_info[search_info_idx];
       var col = check.col;
-      if(row[col] == check.value) {
+      if (row[col] == check.value) {
         matches++;
       }
     }
     //If all criteria are matched, assemble the record as an object and append to search results array
-    if(matches === search_info.length) {
+    if (matches === search_info.length) {
       var record = {};
       for (var idx in this.headers) {
         var key = this.headers[idx];
@@ -141,7 +142,7 @@ GoogleSheet.prototype.find = function (query) {
   var search_results = [];
   //Search info is an array of objects of the format {col: i, value: v}, where i is the column to search and v is the value to be found
   var search_info = Object.keys(query).map(
-    function(key) {
+    function (key) {
       var value = query[key];
       var col_idx = self.headers.indexOf(key);
       return {
@@ -154,25 +155,25 @@ GoogleSheet.prototype.find = function (query) {
   //Run through all rows in the current sheet and check for the rows that match
   var numrows = this.sheet.getLastRow() - 1; //Subtract 1 to remove the header row
   var numcols = this.sheet.getLastColumn();
-  if(numrows < 1) {
+  if (numrows < 1) {
     return []; //Do not attempt to query the sheet if there are no rows
   }
   var range = this.sheet.getRange(2, 1, numrows, numcols); //Start at 2 to exclude header row
   var data = range.getValues();
 
-  for(var row_idx in data){
+  for (var row_idx in data) {
     var row = data[row_idx];
     var matches = 0;
     //check that all the search criteria are matched
-    for(var search_info_idx in search_info) {
+    for (var search_info_idx in search_info) {
       var check = search_info[search_info_idx];
       var col = check.col;
-      if(row[col] == check.value) {
+      if (row[col] == check.value) {
         matches++;
       }
     }
     //If all criteria are matched, assemble the record as an object and append to search results array
-    if(matches === search_info.length) {
+    if (matches === search_info.length) {
       var record = {};
       for (var idx in this.headers) {
         var key = this.headers[idx];
@@ -194,7 +195,7 @@ GoogleSheet.prototype.filter = function (isAllowed) {
   //Run through all rows in the current sheet and check for the rows that match
   var numrows = this.sheet.getLastRow() - 1; //Subtract 1 to remove the header row
   var numcols = this.sheet.getLastColumn();
-  if(numrows < 1) {
+  if (numrows < 1) {
     return []; //Do not attempt to query the sheet if there are no rows
   }
   var range = this.sheet.getRange(2, 1, numrows, numcols); //Start at 2 to exclude header row
@@ -221,7 +222,7 @@ GoogleSheet.prototype.filterRaw = function (isAllowed) {
   //Run through all rows in the current sheet and check for the rows that match
   var numrows = this.sheet.getLastRow() - 1; //Subtract 1 to remove the header row
   var numcols = this.sheet.getLastColumn();
-  if(numrows < 1) {
+  if (numrows < 1) {
     return []; //Do not attempt to query the sheet if there are no rows
   }
   var range = this.sheet.getRange(2, 1, numrows, numcols); //Start at 2 to exclude header row
