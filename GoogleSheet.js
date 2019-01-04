@@ -77,7 +77,8 @@ GoogleSheet.prototype.appendObject = function (object) {
   if (isArray) {
     for (var index in this.headers) {
       key = this.headers[index];
-      row[index] = object[key];
+      var value = (object[key] === undefined) ? null : object[key];
+      row[index] = value;
     }
   } else {
     for (var key in object) {
