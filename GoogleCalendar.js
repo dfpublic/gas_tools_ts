@@ -7,8 +7,8 @@ GoogleCalendar.prototype.getEvents = function (startTime, endTime) {
     function (event) {
       var event_start = event.getStartTime();
       var event_end = event.getEndTime();
-      start_day = formatDay(event_start);
-      end_day = formatDay(event_end);
+      var start_day = formatDay(event_start);
+      var end_day = formatDay(event_end);
       return {
         id: event.getId(),
         calendar_name: calendar_name,
