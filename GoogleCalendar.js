@@ -13,17 +13,43 @@ GoogleCalendar.prototype.getEvents = function (startTime, endTime) {
         id: event.getId(),
         calendar_name: calendar_name,
         title: event.getTitle(),
+        description: event.getDescription(),
         start_time: event_start,
         end_time: event_end,
         duration: start_day === end_day ? start_day : start_day + ' - ' + end_day,
         //month: formatMonth(event_start),
         is_all_day: event.isAllDayEvent() ? 1 : 0,
-        toShortString: function(){
-          return '[' + this.start_time.toDateString() + ' - ' + this.end_time.toDateString() + ']' + ' | ' + this.title;
+        toShortString: function () {
+          if (this.is_all_day) {
+            return '[' + formatDate(this.start_time) + '] | ' + this.title;
+          } else {
+            return '[' + formatDate(this.start_time) + ' - ' + formatDate(this.end_time) + ']' + ' | ' + this.title;
+          }
+          //return '[' + this.start_time.toDateString() + ' - ' + this.end_time.toDateString() + ']' + ' | ' + this.title;
         }
       }
     }
   );
+}
+
+/**
+ * 
+ * @param {{id: string, calendar_name: string, title: string, description: string, start_time: Date, end_time: Date}} event 
+ */
+GoogleCalendar.prototype.updateEvent = function(event) {
+  var self = this;
+  if(event.id) {
+    var calendar_event = CalendarApp.getEventById(event.id);
+    if(calendar_event) {
+      calendar_event.setTitle(event.title);
+      calendar_event.setDescription(event.description);
+      calendar_event.setTime(event.start_time, event.end_time);
+    }
+  }
+  else {
+    var new_event = self.createEvent(event.title, event.start_time, event.end_time);
+    new_event.setDescription(event.description);
+  }
 }
 
 GoogleCalendar.prototype.deleteAllEvents = function (startTime, endTime) {
@@ -41,38 +67,76 @@ GoogleCalendar.prototype.createEvent = function (title, startTime, endTime) {
 }
 
 /**
- * @param {Date} date 
+ * @param {Date} date_raw 
  */
-function formatDate(date) {
-  return '' + date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+function formatDate(date_raw) {
+  var date_formatted = {
+    year: date_raw.getFullYear(),
+    month: date_raw.getMonth() + 1,
+    date: date_raw.getDate()
+  };
+  var year = date_formatted.year,
+    month = date_formatted.month,
+    date = date_formatted.date;
+  month = month < 10 ? '0' + month : '' + month;
+  date = date < 10 ? '0' + date : '' + date;
+  return year + "/" + month + "/" + date;
+  // return '' + date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
 }
 
-function formatMonth(date){
-  switch(date.getMonth()) {
+/**
+ * @param {Date} date_raw 
+ */
+function formatDateTime(date_raw) {
+  var date_formatted = {
+    year: date_raw.getFullYear(),
+    month: date_raw.getMonth() + 1,
+    date: date_raw.getDate(),
+    hours: date_raw.getHours(),
+    minutes: date_raw.getMinutes(),
+    seconds: date_raw.getSeconds()
+
+  };
+  var year = date_formatted.year,
+    month = date_formatted.month,
+    date = date_formatted.date,
+    hours = date_formatted.hours,
+    minutes = date_formatted.minutes,
+    seconds = date_formatted.seconds;
+  month = month < 10 ? '0' + month : '' + month;
+  date = date < 10 ? '0' + date : '' + date;
+  hours = hours < 10 ? '0' + hours : '' + hours;
+  minutes = minutes < 10 ? '0' + minutes : '' + minutes;
+  seconds = seconds < 10 ? '0' + seconds : '' + seconds;
+  return year + "/" + month + "/" + date + " " + hours + ":" + minutes + ":" + seconds;
+}
+
+function formatMonth(date) {
+  switch (date.getMonth()) {
     case 0:
-    return 'January';
-    case 1: 
-    return 'February';
-    case 2: 
-    return 'March';
-    case 3: 
-    return 'April';
-    case 4: 
-    return 'May';
-    case 5: 
-    return 'June';
-    case 6: 
-    return 'July';
-    case 7: 
-    return 'August';
-    case 8: 
-    return 'September';
-    case 9: 
-    return 'October';
-    case 10: 
-    return 'November';
-    case 11: 
-    return 'December';
+      return 'January';
+    case 1:
+      return 'February';
+    case 2:
+      return 'March';
+    case 3:
+      return 'April';
+    case 4:
+      return 'May';
+    case 5:
+      return 'June';
+    case 6:
+      return 'July';
+    case 7:
+      return 'August';
+    case 8:
+      return 'September';
+    case 9:
+      return 'October';
+    case 10:
+      return 'November';
+    case 11:
+      return 'December';
   }
 }
 
