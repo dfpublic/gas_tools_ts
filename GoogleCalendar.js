@@ -1,6 +1,10 @@
 function GoogleCalendar(calendarId) {
   this.calendar = CalendarApp.getCalendarById(calendarId);
 }
+GoogleCalendar.SpreadsheetHeaders = ['id', 'calendar_name', 'title', 'start_time', 'end_time', 'duration', 'is_all_day'];
+GoogleCalendar.FormatDate = function (year, month, day) {
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+}
 GoogleCalendar.prototype.getEvents = function (startTime, endTime) {
   var calendar_name = this.calendar.getName();
   return this.calendar.getEvents(startTime, endTime).map(
