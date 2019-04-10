@@ -1,7 +1,7 @@
 function GoogleCalendar(calendarId) {
   this.calendar = CalendarApp.getCalendarById(calendarId);
 }
-GoogleCalendar.SpreadsheetHeaders = ['id', 'calendar_name', 'title', 'start_time', 'end_time', 'duration', 'is_all_day'];
+GoogleCalendar.SpreadsheetHeaders = ['id', 'calendar_name', 'title', 'start_time', 'end_time', 'duration', 'is_all_day', 'is_recurring'];
 GoogleCalendar.FormatDate = function (year, month, day) {
   return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 }
@@ -23,6 +23,7 @@ GoogleCalendar.prototype.getEvents = function (startTime, endTime) {
         duration: start_day === end_day ? start_day : start_day + ' - ' + end_day,
         //month: formatMonth(event_start),
         is_all_day: event.isAllDayEvent() ? 1 : 0,
+        is_recurring: event.isRecurringEvent() ? 1 : 0,
         toShortString: function () {
           if (this.is_all_day) {
             return '[' + formatDate(this.start_time) + '] | ' + this.title;
