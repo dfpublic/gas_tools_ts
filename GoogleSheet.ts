@@ -76,7 +76,12 @@ export class GoogleSheet {
 
   }
 
-  appendObject(object: any) {
+  appendObject(object: any, options: { background?: string } = {}) {
+    var row_idx = this.sheet.getLastRow() + 1;
+    var row_width = this.headers.length;
+
+    let { background } = options;
+
     var row: Array<any> = [];
     var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
     if (isArray) {
@@ -91,6 +96,9 @@ export class GoogleSheet {
       }
     }
     this.sheet.appendRow(row);
+    if (background) {
+      this.sheet.getRange(row_idx, 1, 1, row_width).setBackground(background);
+    }
   }
   findOne(query: any) {
     var self = this;
@@ -266,6 +274,20 @@ export class GoogleSheet {
     return values[0];
   }
 
+  /**
+   * Get any metadata for the row to be propagated
+   * @param row 
+   */
+  metaAtIndex(row: number) {
+    var numcols = this.headers.length;
+    var range = this.sheet.getRange(row + 1, 1, 1, numcols);
+    var background = range.getBackground();
+    return {
+      background
+    };
+
+  }
+
   //Returns 0 based index
   rowIndexForValue(header: string, value: string) {
     var search_index = this.headers.indexOf(header);
@@ -294,18 +316,21 @@ export class GoogleSheet {
   map(callback: Function) {
     var headers = this.headers;
     var numrows = this.sheet.getLastRow();
+    let results = [];
     for (var i = 1; i < numrows; i++) { // Start at 1 to exclude headers
       var row = this.rowAtIndex(i);
-      var object: any = {};
-      //Packge row as data
+      var ___meta = this.metaAtIndex(i); //Propogate metadata
+      var object: any = { ___meta };
+      //Package row as data
       for (var j = 0; j < headers.length; j++) {
         var key = headers[j];
         var value = row[j];
         object[key] = value;
       }
       //Callback
-      callback(object, i - 1);
-
+      let new_val = callback(object, i - 1);
+      results.push(new_val);
     }
+    return results;
   }
 }
