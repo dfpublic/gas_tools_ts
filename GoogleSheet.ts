@@ -27,7 +27,7 @@ export class GoogleSheet {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
   headers: string[];
   constructor(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet, tabName: string, headers: Array<string>) {
-    this.sheet = spreadsheet.getSheetByName(tabName);
+    this.sheet = spreadsheet.getSheetByName(tabName) || spreadsheet.insertSheet(tabName);
     this.headers = headers;
     var headersIsArray = Object.prototype.toString.call(this.headers) == '[object Array]';
     if (headersIsArray) {
@@ -100,6 +100,31 @@ export class GoogleSheet {
       this.sheet.getRange(row_idx, 1, 1, row_width).setBackground(background);
     }
   }
+
+  prependObject(object: any, options: { background?: string } = {}) {
+    let row_idx = 2;
+    var row_width = this.headers.length;
+    this.sheet.insertRowBefore(row_idx);
+    let cells = this.sheet.getRange(row_idx, 1,1, row_width); //Get new range
+    let { background } = options;
+
+    var row: Array<any> = [];
+    var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
+    if (isArray) {
+      for (var index in this.headers) {
+        key = this.headers[index];
+        var value = (object[key] === undefined) ? null : object[key];
+        row[index] = value;
+      }
+    } else {
+      for (var key in object) {
+        row.push(object[key]);
+      }
+    }
+    cells.setValues([row]);
+    background ? cells.setBackground(background) : '';
+  }
+
   findOne(query: any) {
     var self = this;
     var search_result = null;
