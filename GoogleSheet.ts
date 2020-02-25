@@ -48,19 +48,26 @@ export class GoogleSheet {
   }
 
   initHeaders() {
-    var actual_headers = this.getSpreadsheetHeaders();
-    var validated_count = 0;
-    for (var key in actual_headers) {
-      if (actual_headers[key] == this.headers[key]) {
-        validated_count++;
+    var lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      var actual_headers = this.getSpreadsheetHeaders();
+      var validated_count = 0;
+      for (var key in actual_headers) {
+        if (actual_headers[key] == this.headers[key]) {
+          validated_count++;
+        }
       }
-    }
 
-    //If no headers are found or not all rows are validated, append a header row
-    if (actual_headers.length == 0 || validated_count != this.headers.length) {
-      this.sheet.appendRow(this.headers);
+      //If no headers are found or not all rows are validated, append a header row
+      if (actual_headers.length == 0 || validated_count != this.headers.length) {
+        this.sheet.appendRow(this.headers);
+      }
+      return true;
     }
-    return true;
+    finally {
+      lock.releaseLock();
+    }
   }
 
   getSpreadsheetHeaders() {
@@ -77,35 +84,43 @@ export class GoogleSheet {
   }
 
   appendObject(object: any, options: { background?: string } = {}) {
-    var row_idx = this.sheet.getLastRow() + 1;
-    var row_width = this.headers.length;
+    var lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      var row_idx = this.sheet.getLastRow() + 1;
+      var row_width = this.headers.length;
 
-    let { background } = options;
+      let { background } = options;
 
-    var row: Array<any> = [];
-    var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
-    if (isArray) {
-      for (var index in this.headers) {
-        key = this.headers[index];
-        var value = (object[key] === undefined) ? null : object[key];
-        row[index] = value;
+      var row: Array<any> = [];
+      var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
+      if (isArray) {
+        for (var index in this.headers) {
+          key = this.headers[index];
+          var value = (object[key] === undefined) ? null : object[key];
+          row[index] = value;
+        }
+      } else {
+        for (var key in object) {
+          row.push(object[key]);
+        }
       }
-    } else {
-      for (var key in object) {
-        row.push(object[key]);
+      this.sheet.appendRow(row);
+      if (background) {
+        this.sheet.getRange(row_idx, 1, 1, row_width).setBackground(background);
       }
     }
-    this.sheet.appendRow(row);
-    if (background) {
-      this.sheet.getRange(row_idx, 1, 1, row_width).setBackground(background);
+    finally {
+      lock.releaseLock();
     }
+
   }
 
   prependObject(object: any, options: { background?: string } = {}) {
     let row_idx = 2;
     var row_width = this.headers.length;
     this.sheet.insertRowBefore(row_idx);
-    let cells = this.sheet.getRange(row_idx, 1,1, row_width); //Get new range
+    let cells = this.sheet.getRange(row_idx, 1, 1, row_width); //Get new range
     let { background } = options;
 
     var row: Array<any> = [];
