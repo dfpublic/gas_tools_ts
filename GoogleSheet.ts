@@ -117,27 +117,34 @@ export class GoogleSheet {
   }
 
   prependObject(object: any, options: { background?: string } = {}) {
-    let row_idx = 2;
-    var row_width = this.headers.length;
-    this.sheet.insertRowBefore(row_idx);
-    let cells = this.sheet.getRange(row_idx, 1, 1, row_width); //Get new range
-    let { background } = options;
+    var lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      let row_idx = 2;
+      var row_width = this.headers.length;
+      this.sheet.insertRowBefore(row_idx);
+      let cells = this.sheet.getRange(row_idx, 1, 1, row_width); //Get new range
+      let { background } = options;
 
-    var row: Array<any> = [];
-    var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
-    if (isArray) {
-      for (var index in this.headers) {
-        key = this.headers[index];
-        var value = (object[key] === undefined) ? null : object[key];
-        row[index] = value;
+      var row: Array<any> = [];
+      var isArray = Object.prototype.toString.call(this.headers) == '[object Array]';
+      if (isArray) {
+        for (var index in this.headers) {
+          key = this.headers[index];
+          var value = (object[key] === undefined) ? null : object[key];
+          row[index] = value;
+        }
+      } else {
+        for (var key in object) {
+          row.push(object[key]);
+        }
       }
-    } else {
-      for (var key in object) {
-        row.push(object[key]);
-      }
+      cells.setValues([row]);
+      background ? cells.setBackground(background) : '';
     }
-    cells.setValues([row]);
-    background ? cells.setBackground(background) : '';
+    finally {
+      lock.releaseLock();
+    }
   }
 
   findOne(query: any) {
